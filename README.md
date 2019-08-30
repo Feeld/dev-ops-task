@@ -1,6 +1,6 @@
 # Feeld DevOps recruitment task
 
-## Instructions 
+## Instructions
 
 Use **Terraform** to set up all **GCP** infrastructure necessary to deploy a simple
 application to **GKE**.
@@ -10,9 +10,9 @@ Then use whatever tools you prefer to deploy the application to the cluster.
 The application should consist of 2 http services and a persistent database
 (of your choice), all 3 deployed to a k8s cluster.
 
-- **Service 1**: should have 1 end point exposed to the outside world. 
-- **Service 2**: should have 1 end point accessible by service 1. 
-- **Database**: should be accessible only from service 2. 
+- **Service 1**: should have 1 end point exposed to the outside world.
+- **Service 2**: should have 1 end point accessible by service 1.
+- **Database**: should be accessible only from service 2.
 
 Calling the end point on service 1 should result in a row/document
 created in the database.

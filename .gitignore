@@ -3,4 +3,3 @@ terraform/.terraform/plugins
 
 # GCP account JSON (unencrypted)
 terraform/_gcp-account.json
-
