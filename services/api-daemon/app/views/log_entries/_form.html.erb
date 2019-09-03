@@ -1,0 +1,32 @@
+<%= form_with(model: log_entry, local: true) do |form| %>
+  <% if log_entry.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(log_entry.errors.count, "error") %> prohibited this log_entry from being saved:</h2>
+
+      <ul>
+        <% log_entry.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :details %>
+    <%= form.text_area :details %>
+  </div>
+
+  <div class="field">
+    <%= form.label :failing %>
+    <%= form.check_box :failing %>
+  </div>
+
+  <div class="field">
+    <%= form.label :message_id %>
+    <%= form.text_field :message_id %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>

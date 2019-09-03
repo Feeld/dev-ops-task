@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Payload:</strong>
+  <%= @message.payload %>
+</p>
+
+<p>
+  <strong>Failing:</strong>
+  <%= @message.failing %>
+</p>
+
+<p>
+  <strong>Delivered:</strong>
+  <%= @message.delivered %>
+</p>
+
+<p>
+  <strong>Delivered at:</strong>
+  <%= @message.delivered_at %>
+</p>
+
+<%= link_to 'Edit', edit_message_path(@message) %> |
+<%= link_to 'Back', messages_path %>
