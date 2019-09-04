@@ -1,0 +1,13 @@
+{
+    "sqltools.connections": [
+        {
+            "askForPassword": false,
+            "connectionTimeout": 30,
+            "database": "api-daemon_development",
+            "dialect": "PostgreSQL",
+            "name": "development",
+            "socketPath": "/private/tmp/postgres-socket",
+            "username": "api-daemon_development"
+        }
+    ]
+}
