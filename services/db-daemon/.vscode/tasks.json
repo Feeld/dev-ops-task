@@ -4,14 +4,18 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Create test-project",
+            "label": "prep for launch",
             "type": "shell",
-            "command": "rails new test-project -G --skip && cd test-project && bundle install"
-        }, 
-        {
-            "label": "Delete test-project",
-            "type": "shell",
-            "command": "cd test-project && rm -rf * && rm -f .ruby-version"
-        }, 
-    ], 
+            "command": "bundle install && yarn install && rails db:migrate",
+            "presentation": {
+                "echo": true,
+                "reveal": "never",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": true,
+                "revealProblems": "onProblem"
+            }
+        },
+    ],
 }

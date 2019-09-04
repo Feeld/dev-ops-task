@@ -11,7 +11,6 @@ ARG USER_GID=$USER_UID
 # Configure apt and install packages
 RUN apt-get update \
   && apt-get -y install --no-install-recommends apt-utils dialog 2>&1 \
-  #
   # Install vim, git, process tools, lsb-release
   && apt-get install -y \
   vim \
@@ -19,7 +18,6 @@ RUN apt-get update \
   locales \
   procps \
   lsb-release \
-  #
   # Install ruby
   && apt-get install -y \
   ruby \
@@ -28,21 +26,18 @@ RUN apt-get update \
   libsqlite3-dev \
   zlib1g-dev \
   libxml2 \
-  #
   # Install nodejs
   && apt-get install -y nodejs \
-  #
   # Install debug tools
   && gem install \
   rake \
   ruby-debug-ide \
   debase \
-  #
+  foreman \
   # Install sinatra MVC components
   && gem install \
   rails \
   webdrivers \
-  #
   # Create a non-root user to use if preferred - see https://aka.ms/vscode-remote/containers/non-root-user.
   && groupadd --gid $USER_GID $USERNAME \
   && useradd -s /bin/bash --uid $USER_UID --gid $USER_GID -m $USERNAME \
