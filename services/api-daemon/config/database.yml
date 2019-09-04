@@ -23,8 +23,8 @@ default: &default
 
 development:
   <<: *default
-  database: api-daemon_development
-  username: api-daemon_development
+  database: api_daemon_development
+  username: api_daemon_development
 
   # The specified database role being used to connect to postgres.
   # To create additional roles in postgres see `$ createuser --help`.
@@ -53,8 +53,8 @@ development:
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: api-daemon_test
-  username: api-daemon_test
+  database: api-daemon-test
+  username: api-daemon-test
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -77,6 +77,6 @@ test:
 #
 production:
   <<: *default
-  database: api-daemon_production
-  username: api-daemon_production
-  password: <%= ENV['api-daemon_production_DATABASE_PASSWORD'] %>
+  database: api-daemon-production
+  username: api-daemon-production
+  password: <%= ENV['api-daemon-production_DATABASE_PASSWORD'] %>

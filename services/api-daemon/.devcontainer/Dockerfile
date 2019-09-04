@@ -16,6 +16,7 @@ RUN apt-get update \
   && apt-get install -y \
   vim \
   git \
+  locales \
   procps \
   lsb-release \
   #
@@ -50,6 +51,23 @@ RUN apt-get update \
   # && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
   # && chmod 0440 /etc/sudoers.d/$USERNAME \
   #
+  # Set up locale
+  && echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
+  && echo "en_GB.UTF-8 UTF-8" >> /etc/locale.gen \
+  && /usr/sbin/locale-gen \
+  # Install PostgreSQL 11
+  && apt-get install -y postgresql-11 \
+  && update-rc.d postgresql defaults \
+  && echo 'local all all trust' > /etc/postgresql/11/main/pg_hba.conf \
+  && service postgresql start \
+  && sleep 5 \
+  && su postgres -c 'createuser -s api_daemon_development' \
+  && su postgres -c 'createuser -s api_daemon_test' \
+  && su postgres -c 'createuser -s api_daemon_production' \
+  && su postgres -c 'createdb api_daemon_development -O api_daemon_development' \
+  && su postgres -c 'createdb api_daemon_test -O api_daemon_test' \
+  && su postgres -c 'createdb api_daemon_production -O api_daemon_production' \
+  && echo \
   # Clean up
   && apt-get autoremove -y \
   && apt-get clean -y \
