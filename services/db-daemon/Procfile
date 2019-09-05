@@ -1,1 +1,3 @@
-web: bundle exec rails server -u puma -b 0.0.0.0 -p 3000 
+web: bundle exec rails server ${SERVER_OPTS}
+delivery: QUEUE=* rake resque:work
+scheduler: QUEUE=* rake resque:scheduler

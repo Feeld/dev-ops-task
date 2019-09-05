@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
-class ApplicationController < ActionController::Base
-  protect_from_forgery unless: -> { request.format.json? }
+class ApplicationController < ActionController::API
+  # probably only needed for full Rails
+  # protect_from_forgery unless: -> { request.format.json? }
 end

@@ -1,0 +1,4 @@
+db_rtt_ms <%= number_with_precision(@metrics.db_rtt * 1000, precision: 3).to_f %> <%= @metrics.time %>
+redis_rtt_ms <%= number_with_precision(@metrics.redis_rtt * 1000, precision: 3).to_f %> <%= @metrics.time %>
+processed_deliveries <%= @metrics.processed_deliveries.to_i %> <%= @metrics.time %>
+failed_deliveries <%= @metrics.failed_deliveries.to_i %> <%= @metrics.time %>
