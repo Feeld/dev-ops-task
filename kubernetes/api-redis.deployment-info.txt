@@ -1,0 +1,68 @@
+LAST DEPLOYED: Fri Sep  6 14:55:25 2019
+NAMESPACE: fp
+STATUS: DEPLOYED
+
+RESOURCES:
+==> v1/ConfigMap
+NAME              DATA  AGE
+api-redis         3     2m37s
+api-redis-health  6     2m37s
+
+==> v1/Pod(related)
+NAME                READY  STATUS   RESTARTS  AGE
+api-redis-master-0  2/2    Running  0         2m37s
+api-redis-slave-0   2/2    Running  0         2m37s
+api-redis-slave-1   2/2    Running  0         101s
+
+==> v1/Secret
+NAME       TYPE    DATA  AGE
+api-redis  Opaque  1     2m37s
+
+==> v1/Service
+NAME                TYPE       CLUSTER-IP      EXTERNAL-IP  PORT(S)   AGE
+api-redis-headless  ClusterIP  None            <none>       6379/TCP  2m37s
+api-redis-master    ClusterIP  10.103.237.97   <none>       6379/TCP  2m37s
+api-redis-metrics   ClusterIP  10.101.116.93   <none>       9121/TCP  2m37s
+api-redis-slave     ClusterIP  10.100.251.209  <none>       6379/TCP  2m37s
+
+==> v1/ServiceAccount
+NAME       SECRETS  AGE
+api-redis  1        2m37s
+
+==> v1beta2/StatefulSet
+NAME              READY  AGE
+api-redis-master  1/1    2m37s
+api-redis-slave   2/2    2m37s
+
+
+NOTES:
+** Please be patient while the chart is being deployed **
+Redis can be accessed via port 6379 on the following DNS names from within your cluster:
+
+api-redis-master.fp.svc.cluster.local for read/write operations
+api-redis-slave.fp.svc.cluster.local for read-only operations
+
+
+To get your password run:
+
+    export REDIS_PASSWORD=$(kubectl get secret --namespace fp api-redis -o jsonpath="{.data.redis-password}" | base64 --decode)
+
+To connect to your Redis server:
+
+1. Run a Redis pod that you can use as a client:
+
+   kubectl run --namespace fp api-redis-client --rm --tty -i --restart='Never' \
+    --env REDIS_PASSWORD=$REDIS_PASSWORD \
+   --image docker.io/bitnami/redis:5.0.5-debian-9-r124 -- bash
+
+2. Connect using the Redis CLI:
+   redis-cli -h api-redis-master -a $REDIS_PASSWORD
+   redis-cli -h api-redis-slave -a $REDIS_PASSWORD
+
+To connect to your database from outside the cluster execute the following commands:
+
+    kubectl port-forward --namespace fp svc/api-redis 6379:6379 &
+    redis-cli -h 127.0.0.1 -p 6379 -a $REDIS_PASSWORD
+
+
+

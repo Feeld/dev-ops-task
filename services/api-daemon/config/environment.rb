@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
-require 'dotenv'
-Dotenv.load '.env'
+unless ENV['RAILS_ENV'] == 'production'
+  require 'dotenv'
+  Dotenv.load '.env'
+end
 
 require 'benchmark'
 

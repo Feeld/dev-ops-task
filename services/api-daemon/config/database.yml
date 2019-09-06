@@ -80,5 +80,5 @@ test:
 #
 production:
   <<: *default
-  url: <%= ENV.fetch('DATABASE_URL') {
+  url: <%= ENV.fetch('DB_URL') {
   'postgres://api_daemon:api_daemon_password@localhost/api_daemon' } %>

@@ -38,7 +38,7 @@ class InternalController < ApplicationController
       Redis.new(
         url: ENV['REDIS_URL'],
         thread_safe: true
-      )
+      ).ping
     end
   end
 

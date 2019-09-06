@@ -1,0 +1,165 @@
+image:
+  registry: docker.io
+  repository: bitnami/redis
+  tag: 5.0.5-debian-9-r124
+  pullPolicy: IfNotPresent
+
+fullnameOverride: api-redis
+
+## Cluster settings
+cluster:
+  enabled: true
+  slaveCount: 2
+
+sentinel:
+  enabled: false
+
+clusterDomain: cluster.local
+
+networkPolicy:
+  enabled: false
+  allowExternal: true
+
+serviceAccount:
+  create: true
+
+rbac:
+  create: false
+
+## Redis pod Security Context
+securityContext:
+  enabled: true
+  fsGroup: 1001
+  runAsUser: 1001
+
+usePassword: true
+# existingSecret: api-redis-password
+
+usePasswordFile: false
+
+# Redis port
+redisPort: 6379
+
+master:
+  command: "/run.sh"
+  disableCommands:
+    - FLUSHDB
+    - FLUSHALL
+  podLabels: {}
+  podAnnotations: {}
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 5
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 5
+  service:
+    type: ClusterIP
+    port: 6379
+    annotations: {}
+  persistence:
+    enabled: true
+    path: /data
+    accessModes:
+      - ReadWriteOnce
+    size: 8Gi
+  statefulset:
+    updateStrategy: RollingUpdate
+
+slave:
+  service:
+    type: ClusterIP
+    port: 6379
+    annotations: {}
+  port: 6379
+  command: "/run.sh"
+  disableCommands:
+    - FLUSHDB
+    - FLUSHALL
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 5
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 10
+    successThreshold: 1
+    failureThreshold: 5
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+  podLabels: {}
+  podAnnotations: {}
+  persistence:
+    enabled: true
+    path: /data
+    accessModes:
+      - ReadWriteOnce
+    size: 8Gi
+  statefulset:
+    updateStrategy: RollingUpdate
+
+metrics:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: bitnami/redis-exporter
+    tag: 1.1.0-debian-9-r16
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+  service:
+    type: ClusterIP
+    annotations: {}
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9121"
+
+volumePermissions:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: bitnami/minideb
+    tag: stretch
+    pullPolicy: Always
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+
+configmap: |-
+  appendonly yes
+  save ""
+
+sysctlImage:
+  enabled: true
+  command: []
+  registry: docker.io
+  repository: bitnami/minideb
+  tag: stretch
+  pullPolicy: Always
+  mountHostSys: false
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
