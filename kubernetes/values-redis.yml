@@ -17,8 +17,8 @@ sentinel:
 clusterDomain: cluster.local
 
 networkPolicy:
-  enabled: false
-  allowExternal: true
+  enabled: true
+  allowExternal: false
 
 serviceAccount:
   create: true

@@ -9,12 +9,12 @@ metadata:
 spec:
   ports:
     - name: http
-      port: 3000
+      port: 80
       protocol: TCP
       targetPort: 3000
   selector:
     app: api-daemon
-  type: ClusterIP
+  type: LoadBalancer
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -33,11 +33,13 @@ spec:
     metadata:
       labels:
         app: api-daemon
+        api-redis-client: "true"
+        api-postgres-client: "true"
     spec:
       imagePullSecrets:
         - name: github-daveio
       containers:
-        - image: docker.pkg.github.com/daveio/feeld-recruitment-task/api-daemon:pre3
+        - image: docker.pkg.github.com/daveio/feeld-recruitment-task/api-daemon:pre4
           name: api-daemon
           resources:
             requests:
@@ -50,14 +52,12 @@ spec:
             - name: RAILS_ENV
               value: production
             - name: DB_URL
-              value: postgres://api_daemon@api-postgres.fp/api_daemon
+              value: postgres://api_daemon:on1majeeg7EGhauWohbio9Aezeepaf0i@api-postgres.fp/api_daemon
             - name: REDIS_URL
-              value: redis://api-redis-master.fp:6379/1
+              value: redis://:ew04QwkJs6@api-redis-master.fp:6379/1
             - name: RAILS_MASTER_KEY
               value: d85475872d82788a888e558989f5a1e2
             - name: SERVER_OPTS
               value: -u puma -b 0.0.0.0 -p 3000
             - name: DELIVERY_ENDPOINT
-              value: https://db-daemon.eu.ngrok.io/19rwk3d1
-            - name: REDIS_PASSWORD
-              value: ew04QwkJs6
+              value: https://db-daemon.eu.ngrok.io/yzkmq4yz
