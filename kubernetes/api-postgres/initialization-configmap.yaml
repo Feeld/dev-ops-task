@@ -1,0 +1,14 @@
+---
+# Source: postgresql/templates/initialization-configmap.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-postgres-init-scripts
+  labels:
+    app: postgresql
+data:
+  su.sh: |
+    #!/bin/sh
+    /opt/bitnami/postgresql/bin/createuser -w -U postgres -s api_daemon
+    /opt/bitnami/postgresql/bin/createdb -U postgres api_daemon -O api_daemon

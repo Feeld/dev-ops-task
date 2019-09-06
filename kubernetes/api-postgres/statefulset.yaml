@@ -1,0 +1,182 @@
+---
+# Source: postgresql/templates/statefulset.yaml
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: api-postgres-master
+  labels:
+    app: postgresql
+spec:
+  serviceName: api-postgres-headless
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: postgresql
+      role: master
+  template:
+    metadata:
+      name: api-postgres
+      labels:
+        app: postgresql
+        role: master
+    spec:
+      securityContext:
+        fsGroup: 1001
+      serviceAccountName: api-postgres
+      initContainers:
+        - name: init-chmod-data
+          image: docker.io/bitnami/minideb:stretch
+          imagePullPolicy: "Always"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /bitnami/postgresql/data
+              chmod 700 /bitnami/postgresql/data
+              find /bitnami/postgresql -mindepth 1 -maxdepth 1 -not -name ".snapshot" -not -name "lost+found" | \
+                xargs chown -R 1001:1001
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/postgresql
+              subPath:
+      containers:
+        - name: api-postgres
+          image: docker.io/bitnami/postgresql:11.5.0-debian-9-r26
+          imagePullPolicy: "IfNotPresent"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+
+          securityContext:
+            runAsUser: 1001
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: POSTGRESQL_PORT_NUMBER
+              value: "5432"
+            - name: POSTGRESQL_VOLUME_DIR
+              value: "/bitnami/postgresql"
+            - name: PGDATA
+              value: "/bitnami/postgresql/data"
+            - name: POSTGRES_REPLICATION_MODE
+              value: "master"
+            - name: POSTGRES_REPLICATION_USER
+              value: "api_postgres_repl"
+            - name: POSTGRES_REPLICATION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: api-postgres
+                  key: postgresql-replication-password
+            - name: POSTGRES_SYNCHRONOUS_COMMIT_MODE
+              value: "on"
+            - name: POSTGRES_NUM_SYNCHRONOUS_REPLICAS
+              value: "1"
+            - name: POSTGRES_CLUSTER_APP_NAME
+              value: api_daemon
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: api-postgres
+                  key: postgresql-password
+            - name: POSTGRES_DB
+              value: "postgres"
+          ports:
+            - name: postgresql
+              containerPort: 5432
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - exec pg_isready -U "api_daemon" -d "api_daemon" -h 127.0.0.1 -p 5432
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  pg_isready -U "api_daemon" -d "api_daemon" -h 127.0.0.1 -p 5432
+                  [ -f /opt/bitnami/postgresql/tmp/.initialized ]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          volumeMounts:
+            - name: custom-init-scripts
+              mountPath: /docker-entrypoint-initdb.d/
+            - name: data
+              mountPath: /bitnami/postgresql
+              subPath:
+            - name: postgresql-config
+              mountPath: /bitnami/postgresql/conf
+        - name: metrics
+          image: docker.io/bitnami/postgres-exporter:0.5.1-debian-9-r41
+          imagePullPolicy: "IfNotPresent"
+          env:
+            - name: DATA_SOURCE_URI
+              value: "127.0.0.1:5432/api_daemon?sslmode=disable"
+            - name: DATA_SOURCE_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: api-postgres
+                  key: postgresql-password
+            - name: DATA_SOURCE_USER
+              value: api_daemon
+          livenessProbe:
+            httpGet:
+              path: /
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          volumeMounts:
+          ports:
+            - name: metrics
+              containerPort: 9187
+          resources: null
+
+      volumes:
+        - name: postgresql-config
+          configMap:
+            name: api-postgres-configuration
+        - name: custom-init-scripts
+          configMap:
+            name: api-postgres-init-scripts
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: "8Gi"

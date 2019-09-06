@@ -1,0 +1,16 @@
+---
+# Source: postgresql/templates/configmap.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-postgres-configuration
+  labels:
+    app: postgresql
+data:
+  pg_hba.conf: |
+    local all all trust
+    host all all localhost trust
+    host api_daemon api_daemon 10.0.0.0/8 trust
+    host replication api_postgres_repl 10.0.0.0/8 md5
+    host postgres api_postgres_repl 10.0.0.0/8 md5

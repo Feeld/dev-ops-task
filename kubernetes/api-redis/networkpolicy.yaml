@@ -1,0 +1,43 @@
+---
+# Source: redis/templates/networkpolicy.yaml
+
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: "api-redis"
+  labels:
+    app: redis
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+  policyTypes:
+    - Ingress
+    - Egress
+  egress:
+    # Allow outbound connections to other cluster pods
+    - ports:
+        - port: 6379
+      to:
+        - podSelector:
+            matchLabels:
+              app: redis
+  ingress:
+    # Allow inbound connections
+    - ports:
+        - port: 6379
+      from:
+        - podSelector:
+            matchLabels:
+              api-redis-client: "true"
+        - podSelector:
+            matchLabels:
+              role: metrics
+              app: redis
+        - podSelector:
+            matchLabels:
+              role: slave
+              app: redis
+    # Allow prometheus scrapes for metrics
+    - ports:
+        - port: 9121

@@ -5,7 +5,7 @@ metadata:
   labels:
     app: api-daemon
   name: api-daemon
-  namespace: fp
+  namespace: production
 spec:
   ports:
     - name: http
@@ -36,25 +36,20 @@ spec:
         api-redis-client: "true"
         api-postgres-client: "true"
     spec:
-      imagePullSecrets:
-        - name: github-daveio
       containers:
-        - image: docker.pkg.github.com/daveio/feeld-recruitment-task/api-daemon:pre4
+        - image: gcr.io/feeld-daveio/api-daemon:pre-1
           name: api-daemon
           resources:
             requests:
-              cpu: 250m
-              memory: 256Mi
-            limits:
-              cpu: 1000m
-              memory: 1Gi
+              cpu: 100m
+              memory: 128Mi
           env:
             - name: RAILS_ENV
               value: production
             - name: DB_URL
-              value: postgres://api_daemon:on1majeeg7EGhauWohbio9Aezeepaf0i@api-postgres.fp/api_daemon
+              value: postgres://api_daemon:on1majeeg7EGhauWohbio9Aezeepaf0i@api-postgres.production.svc.cluster.local/api_daemon
             - name: REDIS_URL
-              value: redis://:ew04QwkJs6@api-redis-master.fp:6379/1
+              value: redis://:CE6atNNLOU@api-redis-master.production.svc.cluster.local:6379/1
             - name: RAILS_MASTER_KEY
               value: d85475872d82788a888e558989f5a1e2
             - name: SERVER_OPTS
