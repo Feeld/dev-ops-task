@@ -1,12 +1,10 @@
 ---
-# Source: postgresql/templates/initialization-configmap.yaml
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: api-postgres-init-scripts
   labels:
-    app: postgresql
+    app: api-postgres
 data:
   su.sh: |
     #!/bin/sh

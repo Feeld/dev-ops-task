@@ -2,13 +2,13 @@
 kind: NetworkPolicy
 apiVersion: "networking.k8s.io/v1"
 metadata:
-  name: api-postgres
+  name: db-postgres
   labels:
-    app: api-postgres
+    app: db-postgres
 spec:
   podSelector:
     matchLabels:
-      app: api-postgres
+      app: db-postgres
   ingress:
     # Allow inbound connections
     - ports:
@@ -16,10 +16,10 @@ spec:
       from:
         - podSelector:
             matchLabels:
-              api-postgres-client: "true"
+              db-postgres-client: "true"
         - podSelector:
             matchLabels:
-              app: api-postgres
+              app: db-postgres
               role: slave
     # Allow prometheus scrapes
     - ports:

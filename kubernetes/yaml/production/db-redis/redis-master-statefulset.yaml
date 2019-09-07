@@ -2,20 +2,20 @@
 apiVersion: apps/v1beta2
 kind: StatefulSet
 metadata:
-  name: api-redis-master
+  name: db-redis-master
   labels:
-    app: api-redis
+    app: db-redis
 spec:
   selector:
     matchLabels:
       role: master
-      app: api-redis
-  serviceName: api-redis-headless
+      app: db-redis
+  serviceName: db-redis-headless
   template:
     metadata:
       labels:
         role: master
-        app: api-redis
+        app: db-redis
 
       annotations:
         checksum/health: b1e03a7e299df7ade6f071271a94587603d6da9759f48dc73c1def4ba77e8343
@@ -27,9 +27,9 @@ spec:
     spec:
       securityContext:
         fsGroup: 1001
-      serviceAccountName: "api-redis"
+      serviceAccountName: "db-redis"
       containers:
-        - name: api-redis
+        - name: db-redis
           image: "docker.io/bitnami/redis:5.0.5-debian-9-r124"
           imagePullPolicy: "IfNotPresent"
           securityContext:
@@ -60,8 +60,8 @@ spec:
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: api-redis
-                  key: api-redis-password
+                  name: db-redis
+                  key: db-redis-password
             - name: REDIS_PORT
               value: "6379"
           ports:
@@ -118,12 +118,12 @@ spec:
           args:
           env:
             - name: REDIS_ALIAS
-              value: api-redis
+              value: db-redis
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: api-redis
-                  key: api-redis-password
+                  name: db-redis
+                  key: db-redis-password
           volumeMounts:
           ports:
             - name: metrics
@@ -156,18 +156,20 @@ spec:
             requests:
               cpu: 100m
               memory: 128Mi
+
           command: []
+
           securityContext:
             privileged: true
             runAsUser: 0
       volumes:
         - name: health
           configMap:
-            name: api-redis-health
+            name: db-redis-health
             defaultMode: 0755
         - name: config
           configMap:
-            name: api-redis
+            name: db-redis
         - name: redis-tmp-conf
           emptyDir: {}
   volumeClaimTemplates:
@@ -182,5 +184,6 @@ spec:
         resources:
           requests:
             storage: "8Gi"
+
   updateStrategy:
     type: RollingUpdate

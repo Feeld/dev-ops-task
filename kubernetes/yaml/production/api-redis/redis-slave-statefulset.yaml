@@ -1,24 +1,22 @@
 ---
-# Source: redis/templates/redis-slave-statefulset.yaml
-
 apiVersion: apps/v1beta2
 kind: StatefulSet
 metadata:
   name: api-redis-slave
   labels:
-    app: redis
+    app: api-redis
 spec:
   replicas: 1
   serviceName: api-redis-headless
   selector:
     matchLabels:
       role: slave
-      app: redis
+      app: api-redis
   template:
     metadata:
       labels:
         role: slave
-        app: redis
+        app: api-redis
       annotations:
         checksum/health: b1e03a7e299df7ade6f071271a94587603d6da9759f48dc73c1def4ba77e8343
         checksum/configmap: bd6c7dfec70ad5f2597854f266123cd152281c436f3724cabbcfa3fbde1813d7
@@ -74,12 +72,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: api-redis
-                  key: redis-password
+                  key: api-redis-password
             - name: REDIS_MASTER_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: api-redis
-                  key: redis-password
+                  key: api-redis-password
           ports:
             - name: redis
               containerPort: 6379
@@ -113,7 +111,7 @@ spec:
           volumeMounts:
             - name: health
               mountPath: /health
-            - name: redis-data
+            - name: data
               mountPath: /data
             - name: config
               mountPath: /opt/bitnami/redis/mounted-etc
@@ -138,7 +136,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: api-redis
-                  key: redis-password
+                  key: api-redis-password
           volumeMounts:
           ports:
             - name: metrics
@@ -161,9 +159,9 @@ spec:
               memory: 128Mi
 
           volumeMounts:
-            - name: redis-data
+            - name: data
               mountPath: /data
-              subPath:
+              subPath: ""
         - name: init-sysctl
           image: docker.io/bitnami/minideb:stretch
           imagePullPolicy: "Always"
@@ -191,7 +189,7 @@ spec:
           emptyDir: {}
   volumeClaimTemplates:
     - metadata:
-        name: redis-data
+        name: data
         labels:
           app: "redis"
           component: "slave"

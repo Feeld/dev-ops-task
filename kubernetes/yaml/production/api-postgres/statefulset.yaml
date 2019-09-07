@@ -1,11 +1,10 @@
 ---
-# Source: postgresql/templates/statefulset.yaml
 apiVersion: apps/v1beta2
 kind: StatefulSet
 metadata:
   name: api-postgres-master
   labels:
-    app: postgresql
+    app: api-postgres
 spec:
   serviceName: api-postgres-headless
   replicas: 1
@@ -13,13 +12,13 @@ spec:
     type: RollingUpdate
   selector:
     matchLabels:
-      app: postgresql
+      app: api-postgres
       role: master
   template:
     metadata:
       name: api-postgres
       labels:
-        app: postgresql
+        app: api-postgres
         role: master
     spec:
       securityContext:
@@ -47,7 +46,7 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /bitnami/postgresql
-              subPath:
+              subPath: ""
       containers:
         - name: api-postgres
           image: docker.io/bitnami/postgresql:11.5.0-debian-9-r26
@@ -76,7 +75,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: api-postgres
-                  key: postgresql-replication-password
+                  key: api-postgres-replication-password
             - name: POSTGRES_SYNCHRONOUS_COMMIT_MODE
               value: "on"
             - name: POSTGRES_NUM_SYNCHRONOUS_REPLICAS
@@ -89,11 +88,11 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: api-postgres
-                  key: postgresql-password
+                  key: api-postgres-password
             - name: POSTGRES_DB
               value: "postgres"
           ports:
-            - name: postgresql
+            - name: postgres
               containerPort: 5432
           livenessProbe:
             exec:
@@ -124,8 +123,8 @@ spec:
               mountPath: /docker-entrypoint-initdb.d/
             - name: data
               mountPath: /bitnami/postgresql
-              subPath:
-            - name: postgresql-config
+              subPath: ""
+            - name: api-postgres-config
               mountPath: /bitnami/postgresql/conf
         - name: metrics
           image: docker.io/bitnami/postgres-exporter:0.5.1-debian-9-r41
@@ -137,7 +136,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: api-postgres
-                  key: postgresql-password
+                  key: api-postgres-password
             - name: DATA_SOURCE_USER
               value: api_daemon
           livenessProbe:
@@ -165,7 +164,7 @@ spec:
           resources: null
 
       volumes:
-        - name: postgresql-config
+        - name: api-postgres-config
           configMap:
             name: api-postgres-configuration
         - name: custom-init-scripts

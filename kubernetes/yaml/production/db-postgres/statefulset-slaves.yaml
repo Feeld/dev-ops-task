@@ -2,26 +2,26 @@
 apiVersion: apps/v1beta2
 kind: StatefulSet
 metadata:
-  name: "api-postgres-slave"
+  name: "db-postgres-slave"
   labels:
-    app: api-postgres
+    app: db-postgres
 spec:
-  serviceName: api-postgres-headless
+  serviceName: db-postgres-headless
   replicas: 1
   selector:
     matchLabels:
-      app: api-postgres
+      app: db-postgres
       role: slave
   template:
     metadata:
-      name: api-postgres
+      name: db-postgres
       labels:
-        app: api-postgres
+        app: db-postgres
         role: slave
     spec:
       securityContext:
         fsGroup: 1001
-      serviceAccountName: api-postgres
+      serviceAccountName: db-postgres
       initContainers:
         - name: init-chmod-data
           image: docker.io/bitnami/minideb:stretch
@@ -46,7 +46,7 @@ spec:
               mountPath: /bitnami/postgresql
               subPath: ""
       containers:
-        - name: api-postgres
+        - name: db-postgres
           image: docker.io/bitnami/postgresql:11.5.0-debian-9-r26
           imagePullPolicy: "IfNotPresent"
           resources:
@@ -68,23 +68,23 @@ spec:
             - name: POSTGRES_REPLICATION_MODE
               value: "slave"
             - name: POSTGRES_REPLICATION_USER
-              value: "api_postgres_repl"
+              value: "db_postgres_repl"
             - name: POSTGRES_REPLICATION_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: api-postgres
-                  key: api-postgres-replication-password
+                  name: db-postgres
+                  key: db-postgres-replication-password
             - name: POSTGRES_CLUSTER_APP_NAME
-              value: api_daemon
+              value: db_daemon
             - name: POSTGRES_MASTER_HOST
-              value: api-postgres
+              value: db-postgres
             - name: POSTGRES_MASTER_PORT_NUMBER
               value: "5432"
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: api-postgres
-                  key: api-postgres-password
+                  name: db-postgres
+                  key: db-postgres-password
           ports:
             - name: postgres
               containerPort: 5432
@@ -93,7 +93,7 @@ spec:
               command:
                 - sh
                 - -c
-                - exec pg_isready -U "api_daemon" -d "api_daemon" -h 127.0.0.1 -p 5432
+                - exec pg_isready -U "db_daemon" -d "db_daemon" -h 127.0.0.1 -p 5432
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -105,7 +105,7 @@ spec:
                 - sh
                 - -c
                 - |
-                  pg_isready -U "api_daemon" -d "api_daemon" -h 127.0.0.1 -p 5432
+                  pg_isready -U "db_daemon" -d "db_daemon" -h 127.0.0.1 -p 5432
                   [ -f /opt/bitnami/postgresql/tmp/.initialized ]
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -116,12 +116,12 @@ spec:
             - name: data
               mountPath: /bitnami/postgresql
               subPath: ""
-            - name: api-postgres-config
+            - name: db-postgres-config
               mountPath: /bitnami/postgresql/conf
       volumes:
-        - name: api-postgres-config
+        - name: db-postgres-config
           configMap:
-            name: api-postgres-configuration
+            name: db-postgres-configuration
   updateStrategy:
     type: RollingUpdate
   volumeClaimTemplates:

@@ -1,12 +1,10 @@
 ---
-# Source: postgresql/templates/configmap.yaml
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: api-postgres-configuration
   labels:
-    app: postgresql
+    app: api-postgres
 data:
   pg_hba.conf: |
     local all all trust

@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-postgres-configuration
+  labels:
+    app: db-postgres
+data:
+  pg_hba.conf: |
+    local all all trust
+    host all all localhost trust
+    host db_daemon db_daemon 10.0.0.0/8 trust
+    host replication db_postgres_repl 10.0.0.0/8 md5
+    host postgres db_postgres_repl 10.0.0.0/8 md5

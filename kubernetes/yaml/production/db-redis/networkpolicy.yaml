@@ -2,13 +2,13 @@
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
 metadata:
-  name: "api-redis"
+  name: "db-redis"
   labels:
-    app: api-redis
+    app: db-redis
 spec:
   podSelector:
     matchLabels:
-      app: api-redis
+      app: db-redis
   policyTypes:
     - Ingress
     - Egress
@@ -19,7 +19,7 @@ spec:
       to:
         - podSelector:
             matchLabels:
-              app: api-redis
+              app: db-redis
   ingress:
     # Allow inbound connections
     - ports:
@@ -27,15 +27,15 @@ spec:
       from:
         - podSelector:
             matchLabels:
-              api-redis-client: "true"
+              db-redis-client: "true"
         - podSelector:
             matchLabels:
               role: metrics
-              app: api-redis
+              app: db-redis
         - podSelector:
             matchLabels:
               role: slave
-              app: api-redis
+              app: db-redis
     # Allow prometheus scrapes for metrics
     - ports:
         - port: 9121

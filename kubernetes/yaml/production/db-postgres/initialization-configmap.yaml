@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-postgres-init-scripts
+  labels:
+    app: db-postgres
+data:
+  su.sh: |
+    #!/bin/sh
+    /opt/bitnami/postgresql/bin/createuser -w -U postgres -s db_daemon
+    /opt/bitnami/postgresql/bin/createdb -U postgres db_daemon -O db_daemon

@@ -2,35 +2,35 @@
 apiVersion: apps/v1beta2
 kind: StatefulSet
 metadata:
-  name: api-redis-master
+  name: db-redis-slave
   labels:
-    app: api-redis
+    app: db-redis
 spec:
+  replicas: 1
+  serviceName: db-redis-headless
   selector:
     matchLabels:
-      role: master
-      app: api-redis
-  serviceName: api-redis-headless
+      role: slave
+      app: db-redis
   template:
     metadata:
       labels:
-        role: master
-        app: api-redis
-
+        role: slave
+        app: db-redis
       annotations:
         checksum/health: b1e03a7e299df7ade6f071271a94587603d6da9759f48dc73c1def4ba77e8343
         checksum/configmap: bd6c7dfec70ad5f2597854f266123cd152281c436f3724cabbcfa3fbde1813d7
-        checksum/secret: eb2c4e6ca09b9c43f162d2660c438719479511ed60f1ef4f61d8de13ec361d1f
+        checksum/secret: 4b63a78618fb7e271c7aa0f62c34a85d77325fde45efb319a4c314b5eaf7f378
         prometheus.io/port: "9121"
         prometheus.io/scrape: "true"
 
     spec:
       securityContext:
         fsGroup: 1001
-      serviceAccountName: "api-redis"
+      serviceAccountName: "db-redis"
       containers:
-        - name: api-redis
-          image: "docker.io/bitnami/redis:5.0.5-debian-9-r124"
+        - name: db-redis
+          image: docker.io/bitnami/redis:5.0.5-debian-9-r124
           imagePullPolicy: "IfNotPresent"
           securityContext:
             runAsUser: 1001
@@ -42,34 +42,48 @@ spec:
                 password_aux=`cat ${REDIS_PASSWORD_FILE}`
                 export REDIS_PASSWORD=$password_aux
               fi
-              if [[ ! -f /opt/bitnami/redis/etc/master.conf ]];then
-                cp /opt/bitnami/redis/mounted-etc/master.conf /opt/bitnami/redis/etc/master.conf
+              if [[ -n $REDIS_MASTER_PASSWORD_FILE ]]; then
+                password_aux=`cat ${REDIS_MASTER_PASSWORD_FILE}`
+                export REDIS_MASTER_PASSWORD=$password_aux
+              fi
+              if [[ ! -f /opt/bitnami/redis/etc/replica.conf ]];then
+                cp /opt/bitnami/redis/mounted-etc/replica.conf /opt/bitnami/redis/etc/replica.conf
               fi
               if [[ ! -f /opt/bitnami/redis/etc/redis.conf ]];then
                 cp /opt/bitnami/redis/mounted-etc/redis.conf /opt/bitnami/redis/etc/redis.conf
               fi
               ARGS=("--port" "${REDIS_PORT}")
+              ARGS+=("--slaveof" "${REDIS_MASTER_HOST}" "${REDIS_MASTER_PORT_NUMBER}")
               ARGS+=("--requirepass" "${REDIS_PASSWORD}")
-              ARGS+=("--masterauth" "${REDIS_PASSWORD}")
+              ARGS+=("--masterauth" "${REDIS_MASTER_PASSWORD}")
               ARGS+=("--include" "/opt/bitnami/redis/etc/redis.conf")
-              ARGS+=("--include" "/opt/bitnami/redis/etc/master.conf")
-              /run.sh ${ARGS[@]}
+              ARGS+=("--include" "/opt/bitnami/redis/etc/replica.conf")
+              /run.sh "${ARGS[@]}"
           env:
             - name: REDIS_REPLICATION_MODE
-              value: master
+              value: slave
+            - name: REDIS_MASTER_HOST
+              value: db-redis-master-0.db-redis-headless.production.svc.cluster.local
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_MASTER_PORT_NUMBER
+              value: "6379"
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: api-redis
-                  key: api-redis-password
-            - name: REDIS_PORT
-              value: "6379"
+                  name: db-redis
+                  key: db-redis-password
+            - name: REDIS_MASTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-redis
+                  key: db-redis-password
           ports:
             - name: redis
               containerPort: 6379
           livenessProbe:
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 30
+            periodSeconds: 10
             timeoutSeconds: 5
             successThreshold: 1
             failureThreshold: 5
@@ -77,18 +91,18 @@ spec:
               command:
                 - sh
                 - -c
-                - /health/ping_liveness_local.sh 5
+                - /health/ping_liveness_local_and_master.sh 5
           readinessProbe:
             initialDelaySeconds: 5
-            periodSeconds: 5
-            timeoutSeconds: 1
+            periodSeconds: 10
+            timeoutSeconds: 10
             successThreshold: 1
             failureThreshold: 5
             exec:
               command:
                 - sh
                 - -c
-                - /health/ping_readiness_local.sh 5
+                - /health/ping_readiness_local_and_master.sh 5
           resources:
             requests:
               cpu: 100m
@@ -99,11 +113,10 @@ spec:
               mountPath: /health
             - name: data
               mountPath: /data
-              subPath: ""
             - name: config
               mountPath: /opt/bitnami/redis/mounted-etc
             - name: redis-tmp-conf
-              mountPath: /opt/bitnami/redis/etc/
+              mountPath: /opt/bitnami/redis/etc
         - name: metrics
           image: docker.io/bitnami/redis-exporter:1.1.0-debian-9-r16
           imagePullPolicy: "IfNotPresent"
@@ -118,12 +131,12 @@ spec:
           args:
           env:
             - name: REDIS_ALIAS
-              value: api-redis
+              value: db-redis
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: api-redis
-                  key: api-redis-password
+                  name: db-redis
+                  key: db-redis-password
           volumeMounts:
           ports:
             - name: metrics
@@ -156,18 +169,22 @@ spec:
             requests:
               cpu: 100m
               memory: 128Mi
+
           command: []
+
           securityContext:
             privileged: true
             runAsUser: 0
       volumes:
         - name: health
           configMap:
-            name: api-redis-health
+            name: db-redis-health
             defaultMode: 0755
         - name: config
           configMap:
-            name: api-redis
+            name: db-redis
+        - name: sentinel-tmp-conf
+          emptyDir: {}
         - name: redis-tmp-conf
           emptyDir: {}
   volumeClaimTemplates:
@@ -175,12 +192,14 @@ spec:
         name: data
         labels:
           app: "redis"
-          component: "master"
+          component: "slave"
+
       spec:
         accessModes:
           - "ReadWriteOnce"
         resources:
           requests:
             storage: "8Gi"
+
   updateStrategy:
     type: RollingUpdate
