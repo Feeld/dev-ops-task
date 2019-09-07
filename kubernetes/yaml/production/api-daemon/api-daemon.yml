@@ -45,7 +45,7 @@ metadata:
   name: api-daemon
   namespace: production
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: api-daemon
