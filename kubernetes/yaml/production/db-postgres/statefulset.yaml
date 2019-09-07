@@ -32,7 +32,6 @@ spec:
             requests:
               cpu: 100m
               memory: 128Mi
-
           command:
             - sh
             - -c
@@ -55,7 +54,6 @@ spec:
             requests:
               cpu: 100m
               memory: 128Mi
-
           securityContext:
             runAsUser: 1001
           env:
@@ -162,7 +160,6 @@ spec:
             - name: metrics
               containerPort: 9187
           resources: null
-
       volumes:
         - name: db-postgres-config
           configMap:

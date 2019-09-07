@@ -16,14 +16,12 @@ spec:
       labels:
         role: master
         app: db-redis
-
       annotations:
         checksum/health: b1e03a7e299df7ade6f071271a94587603d6da9759f48dc73c1def4ba77e8343
         checksum/configmap: bd6c7dfec70ad5f2597854f266123cd152281c436f3724cabbcfa3fbde1813d7
         checksum/secret: eb2c4e6ca09b9c43f162d2660c438719479511ed60f1ef4f61d8de13ec361d1f
         prometheus.io/port: "9121"
         prometheus.io/scrape: "true"
-
     spec:
       securityContext:
         fsGroup: 1001
@@ -93,7 +91,6 @@ spec:
             requests:
               cpu: 100m
               memory: 128Mi
-
           volumeMounts:
             - name: health
               mountPath: /health
@@ -132,7 +129,6 @@ spec:
             requests:
               cpu: 100m
               memory: 128Mi
-
       initContainers:
         - name: volume-permissions
           image: "docker.io/bitnami/minideb:stretch"
@@ -144,7 +140,6 @@ spec:
             requests:
               cpu: 100m
               memory: 128Mi
-
           volumeMounts:
             - name: data
               mountPath: /data
@@ -156,9 +151,7 @@ spec:
             requests:
               cpu: 100m
               memory: 128Mi
-
           command: []
-
           securityContext:
             privileged: true
             runAsUser: 0
@@ -184,6 +177,5 @@ spec:
         resources:
           requests:
             storage: "8Gi"
-
   updateStrategy:
     type: RollingUpdate

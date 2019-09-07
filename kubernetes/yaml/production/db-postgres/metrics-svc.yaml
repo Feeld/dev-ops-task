@@ -8,7 +8,6 @@ metadata:
   annotations:
     prometheus.io/port: "9187"
     prometheus.io/scrape: "true"
-
 spec:
   type: ClusterIP
   ports:
