@@ -5,7 +5,7 @@ class InternalController < ApplicationController
     @metrics = build_metrics
     render '/internal/metrics.txt.erb',
            layout: false,
-           content_type: 'application/openmetrics-text'
+           content_type: 'text/plain'
   end
 
   def healthz
