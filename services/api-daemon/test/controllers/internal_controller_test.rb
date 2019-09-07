@@ -12,4 +12,9 @@ class InternalControllerTest < ActionDispatch::IntegrationTest
     get internal_healthz_url
     assert_response :success
   end
+
+  test 'should get root' do
+    get internal_root_url
+    assert_response :success
+  end
 end

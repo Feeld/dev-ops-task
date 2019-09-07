@@ -45,7 +45,7 @@ metadata:
   name: api-daemon
   namespace: production
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: api-daemon
@@ -59,7 +59,7 @@ spec:
         api-postgres-client: "true"
     spec:
       containers:
-        - image: gcr.io/feeld-daveio/api-daemon:pre-2
+        - image: gcr.io/feeld-daveio/api-daemon:pre-3
           name: api-daemon
           resources:
             requests:

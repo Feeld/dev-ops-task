@@ -15,6 +15,10 @@ class InternalController < ApplicationController
            content_type: 'application/json'
   end
 
+  def root
+    render json: { "status": "ok" }
+  end
+
   private
 
   def build_metrics
