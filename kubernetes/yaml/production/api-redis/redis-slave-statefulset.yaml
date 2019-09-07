@@ -8,7 +8,7 @@ metadata:
   labels:
     app: redis
 spec:
-  replicas: 2
+  replicas: 1
   serviceName: api-redis-headless
   selector:
     matchLabels:
