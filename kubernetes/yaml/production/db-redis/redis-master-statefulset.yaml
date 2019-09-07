@@ -89,8 +89,8 @@ spec:
                 - /health/ping_readiness_local.sh 5
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 1m
+              memory: 32Mi
           volumeMounts:
             - name: health
               mountPath: /health
@@ -127,8 +127,8 @@ spec:
               containerPort: 9121
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 1m
+              memory: 32Mi
       initContainers:
         - name: volume-permissions
           image: "docker.io/bitnami/minideb:stretch"
@@ -138,8 +138,8 @@ spec:
             runAsUser: 0
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 1m
+              memory: 32Mi
           volumeMounts:
             - name: data
               mountPath: /data
@@ -149,8 +149,8 @@ spec:
           imagePullPolicy: "Always"
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 1m
+              memory: 32Mi
           command: []
           securityContext:
             privileged: true

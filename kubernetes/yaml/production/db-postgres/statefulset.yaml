@@ -30,8 +30,8 @@ spec:
           imagePullPolicy: "Always"
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 1m
+              memory: 32Mi
           command:
             - sh
             - -c
@@ -52,8 +52,8 @@ spec:
           imagePullPolicy: "IfNotPresent"
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 1m
+              memory: 32Mi
           securityContext:
             runAsUser: 1001
           env:

@@ -63,8 +63,8 @@ spec:
           name: api-daemon
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 1m
+              memory: 32Mi
           env:
             - name: RAILS_ENV
               value: production
