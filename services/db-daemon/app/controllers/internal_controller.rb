@@ -5,14 +5,18 @@ class InternalController < ApplicationController
     @metrics = build_metrics
     render '/internal/metrics.txt.erb',
            layout: false,
-           content_type: 'application/openmetrics-text'
+           content_type: 'text/plain'
   end
 
   def healthz
     @metrics = build_metrics
-    render '/internal/healthz.json.jbuilder',
+    render '/internal/healthz',
            layout: false,
            content_type: 'application/json'
+  end
+
+  def root
+    render json: { "status": "ok" }
   end
 
   private
@@ -38,7 +42,7 @@ class InternalController < ApplicationController
       Redis.new(
         url: ENV['REDIS_URL'],
         thread_safe: true
-      )
+      ).ping
     end
   end
 

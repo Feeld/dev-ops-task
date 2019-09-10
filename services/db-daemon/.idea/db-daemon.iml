@@ -115,7 +115,7 @@
     <orderEntry type="library" scope="PROVIDED" name="ruby-debug-ide (v0.7.0, rbenv: 2.6.4) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="ruby-progressbar (v1.10.1, rbenv: 2.6.4) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="ruby_dep (v1.5.0, rbenv: 2.6.4) [gem]" level="application" />
-    <orderEntry type="library" scope="PROVIDED" name="rubyzip (v1.2.3, rbenv: 2.6.4) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rubyzip (v1.2.4, rbenv: 2.6.4) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="rufus-scheduler (v3.6.0, rbenv: 2.6.4) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="selenium-webdriver (v3.142.4, rbenv: 2.6.4) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="sinatra (v2.0.7, rbenv: 2.6.4) [gem]" level="application" />
@@ -136,7 +136,7 @@
     <orderEntry type="library" scope="PROVIDED" name="websocket-extensions (v0.1.4, rbenv: 2.6.4) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="xpath (v3.2.0, rbenv: 2.6.4) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="yard (v0.9.20, rbenv: 2.6.4) [gem]" level="application" />
-    <orderEntry type="library" scope="PROVIDED" name="zeitwerk (v2.1.9, rbenv: 2.6.4) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="zeitwerk (v2.1.10, rbenv: 2.6.4) [gem]" level="application" />
   </component>
   <component name="RModuleSettingsStorage">
     <LOAD_PATH number="0" />

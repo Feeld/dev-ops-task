@@ -14,7 +14,7 @@ Rails.application.configure do
   # Show full error reports.
   config.consider_all_requests_local = true
 
-  config.active_job.queue_name_prefix = 'api_daemon_deliveries_development'
+  config.active_job.queue_name_prefix = 'db_daemon_deliveries_development'
 
   # Enable/disable caching. By default caching is disabled.
   # Run rails dev:cache to toggle caching.

@@ -5,6 +5,7 @@ require 'resque/server'
 Rails.application.routes.draw do
   get 'metrics', to: 'internal#metrics'
   get 'healthz', to: 'internal#healthz'
+  root to: 'internal#root'
   mount Resque::Server, at: '/q'
   resources :log_entries
   resources :messages
