@@ -8,18 +8,7 @@ resource "google_container_cluster" "primary" {
   remove_default_node_pool = true
   initial_node_count       = 1 # per zone in region
   min_master_version       = "${var.gke_master_version}"
-  addons_config {
-    # istio_config {
-    #   disabled = false
-    #   auth = "AUTH_MUTUAL_TLS"
-    # }
-    network_policy_config {
-      disabled = false
-    }
-  }
-  network_policy {
-    enabled = true
-  }
+
   master_auth {
     client_certificate_config {
       issue_client_certificate = true
