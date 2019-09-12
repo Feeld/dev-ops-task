@@ -1,0 +1,127 @@
+#!/bin/bash
+
+_T="$(command -v terraform)"
+_G="$(command -v gcloud)"
+_K="$(command -v kubectl)"
+
+test -x "${_T}" && HAVE_TERRAFORM=1
+test -x "${_G}" && HAVE_GCLOUD=1
+test -x "${_K}" && HAVE_KUBECTL=1
+
+function __bail() {
+    echo "Quitting."
+    exit 1
+}
+
+function __need_terraform() {
+    echo "You seem to be lacking the terraform binary."
+    echo "Please see https://www.terraform.io/downloads.html for installation and setup instructions."
+    __bail
+}
+
+function __need_gcloud() {
+    echo "You seem to be lacking the gcloud binary."
+    echo "Please see https://cloud.google.com/sdk/docs/downloads-interactive for installation and setup instructions."
+    __bail
+}
+
+function __need_kubectl() {
+    echo "You seem to be lacking the kubectl binary."
+    if [[ -n "${HAVE_GCLOUD}" ]]; then
+        echo "However, since you have gcloud installed, I can use it to get hold of it for you."
+        read -n 1 -p "Use gcloud to install kubectl (y/n)? " resp
+        echo
+        if [[ ${resp} == "y" ]]; then
+            "${_G}" components install kubectl
+            return
+        fi
+    fi
+    echo "Please see https://kubernetes.io/docs/tasks/tools/install-kubectl for installation and setup instructions."
+    __bail
+}
+
+function __deps() {
+    [[ -z "${HAVE_TERRAFORM}" ]] && __need_terraform
+    [[ -z "${HAVE_GCLOUD}" ]] && __need_gcloud
+    [[ -z "${HAVE_KUBECTL}" ]] && __need_kubectl
+
+    echo
+    echo "All dependencies appear to be present."
+    echo "You can now deploy the environment with '${0} deploy'"
+    echo
+}
+
+function __usage() {
+    echo
+    echo -n "  ${0} help          "
+    echo "Show usage information for this script"
+    echo -n "  ${0} deps          "
+    echo "Check for all the software required by this package"
+    echo
+}
+
+function __wrong_root() {
+    echo "This command should be run in the repository root, that is the same"
+    echo "directory which contains the LICENSE file."
+    __bail
+}
+
+function __deploy() {
+    [[ ! -f ./LICENSE ]] && __wrong_root
+    echo
+    echo "Stage 1: Terraform"
+    echo
+    (
+        cd terraform || exit 1
+        ${_T} init
+        ${_T} apply -auto-approve
+    )
+    echo
+    echo "Stage 2: kubectl configuration"
+    echo
+    (
+        ${_G} beta container clusters get-credentials primary --region europe-west2 --project feeld-daveio
+        ${_K} config use-context gke_feeld-daveio_europe-west2_primary
+    )
+    echo
+    echo "Stage 3: Kubernetes resources"
+    echo
+    (
+        cd kubernetes/yaml || exit 1
+        echo
+        echo "Stage 3a: namespaces"
+        echo
+        ${_K} apply -Rf common
+        sleep 2
+        echo
+        echo "Stage 3b: resources in production namespace"
+        echo
+        ${_K} apply -n production -Rf resources
+        echo
+        echo "Stage 3c: resources in staging namespace"
+        echo
+        ${_K} apply -n staging -Rf resources
+        ${_K} patch -n staging ingress ingress-api-daemon -p '{ "metadata": { "annotations": { "kubernetes.io/ingress.global-static-ip-name": "addr-staging-api-daemon" } } }'
+        ${_K} patch -n staging ingress ingress-api-daemon -p '{ "metadata": { "annotations": { "networking.gke.io/managed-certificates": "cert-staging-api-daemon" } } }'
+    )
+    echo
+    echo "Deployment complete!"
+}
+
+case ${@} in
+deps)
+    __deps
+    ;;
+deploy)
+    __deploy
+    ;;
+help)
+    __usage
+    ;;
+usage)
+    __usage
+    ;;
+*)
+    __usage
+    ;;
+esac

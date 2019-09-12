@@ -10,7 +10,7 @@ class InternalController < ApplicationController
 
   def healthz
     @metrics = build_metrics
-    render '/internal/healthz',
+    render '/internal/healthz.json.jbuilder',
            layout: false,
            content_type: 'application/json'
   end

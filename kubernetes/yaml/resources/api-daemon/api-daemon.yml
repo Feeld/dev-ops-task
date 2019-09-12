@@ -5,7 +5,6 @@ metadata:
   labels:
     app: api-daemon
   name: svc-api-daemon
-  namespace: production
 spec:
   ports:
     - name: http
@@ -18,20 +17,26 @@ spec:
 apiVersion: networking.gke.io/v1beta1
 kind: ManagedCertificate
 metadata:
-  name: cert-api-daemon
-  namespace: production
+  name: cert-production-api-daemon
 spec:
   domains:
     - api.feeld.sl1p.net
+---
+apiVersion: networking.gke.io/v1beta1
+kind: ManagedCertificate
+metadata:
+  name: cert-staging-api-daemon
+spec:
+  domains:
+    - api.staging.feeld.sl1p.net
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: ingress-api-daemon
-  namespace: production
   annotations:
-    kubernetes.io/ingress.global-static-ip-name: addr-api-daemon
-    networking.gke.io/managed-certificates: cert-api-daemon
+    networking.gke.io/managed-certificates: cert-production-api-daemon
+    kubernetes.io/ingress.global-static-ip-name: addr-production-api-daemon
 spec:
   backend:
     serviceName: svc-api-daemon
@@ -43,7 +48,6 @@ metadata:
   labels:
     app: api-daemon
   name: api-daemon
-  namespace: production
 spec:
   replicas: 3
   selector:
@@ -55,11 +59,12 @@ spec:
     metadata:
       labels:
         app: api-daemon
+        version: "1.0.1"
         api-redis-client: "true"
         api-postgres-client: "true"
     spec:
       containers:
-        - image: gcr.io/feeld-daveio/api-daemon:pre-3
+        - image: gcr.io/feeld-daveio/api-daemon:1.0.1
           name: api-daemon
           resources:
             requests:

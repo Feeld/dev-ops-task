@@ -1,5 +1,6 @@
 
-resource "google_container_node_pool" "primary_preempt" {
+resource "google_container_node_pool" "primary" {
+  provider   = "google-beta"
   name       = "primary-pool-0"
   location   = "europe-west2"
   cluster    = "${google_container_cluster.primary.name}"
@@ -7,7 +8,7 @@ resource "google_container_node_pool" "primary_preempt" {
   version    = "${google_container_cluster.primary.master_version}"
 
   node_config {
-    preemptible  = true
+    preemptible  = false
     machine_type = "n1-standard-1"
 
     metadata = {

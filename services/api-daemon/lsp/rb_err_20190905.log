@@ -1,5 +1,0 @@
-bundler: failed to load command: solargraph (/Users/dave/.rbenv/versions/2.6.4/bin/solargraph)
-Gem::Exception: can't find executable solargraph for gem solargraph. solargraph is not currently included in the bundle, perhaps you meant to add it to your Gemfile?
-  /Users/dave/.rbenv/versions/2.6.4/lib/ruby/gems/2.6.0/gems/bundler-2.0.2/lib/bundler/rubygems_integration.rb:460:in `block in replace_bin_path'
-  /Users/dave/.rbenv/versions/2.6.4/lib/ruby/gems/2.6.0/gems/bundler-2.0.2/lib/bundler/rubygems_integration.rb:480:in `block in replace_bin_path'
-  /Users/dave/.rbenv/versions/2.6.4/bin/solargraph:23:in `<top (required)>'

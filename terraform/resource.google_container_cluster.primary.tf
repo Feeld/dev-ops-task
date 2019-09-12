@@ -1,16 +1,26 @@
 variable "gke_master_version" {}
 
 resource "google_container_cluster" "primary" {
+  provider                 = "google-beta"
   name                     = "primary"
   location                 = "europe-west2"
+  network                  = "${google_compute_network.k8s-primary.name}"
   remove_default_node_pool = true
   initial_node_count       = 1 # per zone in region
   min_master_version       = "${var.gke_master_version}"
-
+  addons_config {
+    # istio_config {
+    #   disabled = false
+    #   auth = "AUTH_MUTUAL_TLS"
+    # }
+    network_policy_config {
+      disabled = false
+    }
+  }
+  network_policy {
+    enabled = true
+  }
   master_auth {
-    username = "feeld-master"
-    password = "jee0Wah3Thoh9ha1eehoo6OoMie7ethe"
-
     client_certificate_config {
       issue_client_certificate = true
     }
