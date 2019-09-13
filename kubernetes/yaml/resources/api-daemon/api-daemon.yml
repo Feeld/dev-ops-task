@@ -1,4 +1,20 @@
 ---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: api-daemon
+spec:
+  podSelector:
+    matchLabels:
+      app: api-daemon
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - port: 3000
+          protocol: TCP
+
+---
 apiVersion: v1
 kind: Service
 metadata:

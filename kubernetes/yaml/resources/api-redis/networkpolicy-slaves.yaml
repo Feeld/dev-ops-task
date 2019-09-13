@@ -1,0 +1,73 @@
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: api-redis-slaves
+spec:
+  podSelector:
+    matchLabels:
+      app: api-redis
+      role: slave
+  egress:
+    - ports:
+        - port: 6379
+      to:
+        - podSelector:
+            matchLabels:
+              app: api-redis
+              role: master
+  ingress:
+    - ports:
+        - port: 9121
+    - ports:
+        - port: 6379
+      from:
+        - podSelector:
+            matchLabels:
+              api-redis-client: "true"
+  policyTypes:
+    - Ingress
+    - Egress
+# ---
+# kind: NetworkPolicy
+# apiVersion: networking.k8s.io/v1
+# metadata:
+#   name: "api-redis"
+#   labels:
+#     app: api-redis
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: api-redis
+#   policyTypes:
+#     - Ingress
+#     - Egress
+#   egress:
+#     # Allow outbound connections to other cluster pods
+#     - ports: []
+#       to:
+#         - namespaceSelector:
+#             matchLabels:
+#               name: production
+#         - namespaceSelector:
+#             matchLabels:
+#               name: kube-system
+#   ingress:
+#     # Allow inbound connections
+#     - ports:
+#         - port: 6379
+#       from:
+#         - podSelector:
+#             matchLabels:
+#               api-redis-client: "true"
+#         - podSelector:
+#             matchLabels:
+#               role: metrics
+#               app: api-redis
+#         - podSelector:
+#             matchLabels:
+#               role: slave
+#               app: api-redis
+#     # Allow prometheus scrapes for metrics
+#     - ports:
+#         - port: 9121
