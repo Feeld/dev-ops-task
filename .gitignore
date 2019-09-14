@@ -3,4 +3,5 @@ terraform/.terraform/plugins
 
 # Terraform state for local backend
 terraform/.terraform/terraform.tfstate
+terraform/.terraform/terraform.tfstate.backup
 
