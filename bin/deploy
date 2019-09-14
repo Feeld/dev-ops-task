@@ -68,6 +68,10 @@ function __usage() {
     echo "Deploy Terraform-managed resources"
     echo -n "  ${0} kubernetes    "
     echo "Deploy Kubernetes-managed resources"
+    echo -n "  ${0} staging       "
+    echo "Deploy Kubernetes-managed resources to staging only"
+    echo -n "  ${0} production    "
+    echo "Deploy Kubernetes-managed resources to production only"
     echo -n "  ${0} build         "
     echo "Build daemon Docker images"
     echo -n "  ${0} push          "
@@ -90,25 +94,42 @@ function __terraform() {
     )
 }
 
+function __kproduction() {
+    [[ ! -f ./LICENSE ]] && __wrong_root
+    cd kubernetes/yaml || exit 1
+    ${_K} apply -f common/namespace-production.yml
+    sleep 2
+    ${_K} apply -n production -Rf resources
+}
+
+function __kstaging() {
+    [[ ! -f ./LICENSE ]] && __wrong_root
+    cd kubernetes/yaml || exit 1
+    ${_K} apply -f common/namespace-staging.yml
+    sleep 2
+    ${_K} apply -n staging -Rf resources
+    ${_K} patch -n staging ingress ingress-api-daemon -p '{ "metadata": { "annotations": { "kubernetes.io/ingress.global-static-ip-name": "addr-staging-api-daemon" } } }'
+    ${_K} patch -n staging ingress ingress-api-daemon -p '{ "metadata": { "annotations": { "networking.gke.io/managed-certificates": "cert-staging-api-daemon" } } }'
+}
+
 function __kubernetes() {
     [[ ! -f ./LICENSE ]] && __wrong_root
     (
-        cd kubernetes/yaml || exit 1
-        echo
-        echo "Configuring namespaces"
-        echo
-        ${_K} apply -Rf common
-        sleep 2
         echo
         echo "Configuring resources in production namespace"
         echo
-        ${_K} apply -n production -Rf resources
+        (
+            __kproduction
+        )
         echo
         echo "Configuring resources in staging namespace"
         echo
-        ${_K} apply -n staging -Rf resources
-        ${_K} patch -n staging ingress ingress-api-daemon -p '{ "metadata": { "annotations": { "kubernetes.io/ingress.global-static-ip-name": "addr-staging-api-daemon" } } }'
-        ${_K} patch -n staging ingress ingress-api-daemon -p '{ "metadata": { "annotations": { "networking.gke.io/managed-certificates": "cert-staging-api-daemon" } } }'
+        (
+            __kstaging
+        )
+        echo
+        echo "Kubernetes resources configured"
+        echo
     )
 }
 
@@ -220,6 +241,12 @@ terraform)
     ;;
 kubernetes)
     __kubernetes
+    ;;
+staging)
+    __kstaging
+    ;;
+production)
+    __kproduction
     ;;
 build)
     __build

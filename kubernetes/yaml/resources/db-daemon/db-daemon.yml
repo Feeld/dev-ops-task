@@ -76,7 +76,7 @@ spec:
             - name: RAILS_ENV
               value: production
             - name: DB_URL
-              value: postgres://db_daemon:on1majeeg7EGhauWohbio9Aezeepaf0i@db-postgres.production.svc.cluster.local/db_daemon
+              value: postgres://db_daemon:on1majeeg7EGhauWohbio9Aezeepaf0i@db-postgres/db_daemon
             - name: RAILS_MASTER_KEY
               value: d85475872d82788a888e558989f5a1e2
             - name: SERVER_OPTS
