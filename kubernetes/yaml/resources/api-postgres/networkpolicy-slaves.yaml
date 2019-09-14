@@ -8,10 +8,11 @@ metadata:
 spec:
   policyTypes:
     - Ingress
+    - Egress
   podSelector:
     matchLabels:
       app: api-postgres
-      role: master
+      role: slave
   ingress:
     # Allow inbound connections
     - ports:
@@ -20,10 +21,14 @@ spec:
         - podSelector:
             matchLabels:
               api-postgres-client: "true"
-        - podSelector:
-            matchLabels:
-              app: api-postgres
-              role: slave
     # Allow prometheus scrapes
     - ports:
         - port: 9187
+  egress:
+    - ports:
+        - port: 5432
+      to:
+        - podSelector:
+            matchLabels:
+              app: api-postgres
+              role: master

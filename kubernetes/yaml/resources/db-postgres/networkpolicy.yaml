@@ -6,9 +6,12 @@ metadata:
   labels:
     app: db-postgres
 spec:
+  policyTypes:
+    - Ingress
   podSelector:
     matchLabels:
       app: db-postgres
+      role: master
   ingress:
     # Allow inbound connections
     - ports:

@@ -62,7 +62,7 @@ spec:
             - name: REDIS_REPLICATION_MODE
               value: slave
             - name: REDIS_MASTER_HOST
-              value: api-redis-master-0.api-redis-headless.production.svc.cluster.local
+              value: api-redis-master-0.api-redis-headless
             - name: REDIS_PORT
               value: "6379"
             - name: REDIS_MASTER_PORT_NUMBER
