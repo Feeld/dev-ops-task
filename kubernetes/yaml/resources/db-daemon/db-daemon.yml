@@ -17,7 +17,7 @@ spec:
       from:
         - podSelector:
             matchLabels:
-              app: api-daemon
+              db-daemon-client: "true"
   egress:
     - ports:
         - port: 5432
@@ -62,11 +62,11 @@ spec:
     metadata:
       labels:
         app: db-daemon
-        version: "1.0.1"
+        version: "1.0.3"
         db-postgres-client: "true"
     spec:
       containers:
-        - image: gcr.io/feeld-daveio/db-daemon:1.0.1
+        - image: gcr.io/feeld-daveio/db-daemon:1.0.3
           name: db-daemon
           resources:
             requests:

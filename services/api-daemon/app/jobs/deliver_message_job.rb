@@ -35,7 +35,7 @@ class DeliverMessageJob < ApplicationJob
       req.headers['Content-Type'] = 'application/json'
       req.body = msg.to_json
     end
-    if resp.status == 200
+    if resp.status == 201
       OpenStruct.new(
         ok: true,
         status: resp.status

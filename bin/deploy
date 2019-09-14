@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Version number to tag built images with
-DAEMON_VERSION=1.0.1
+DAEMON_VERSION=1.0.3
 
 _T="$(command -v terraform)"
 _G="$(command -v gcloud)"

@@ -98,12 +98,13 @@ spec:
     metadata:
       labels:
         app: api-daemon
-        version: "1.0.1"
+        version: "1.0.3"
         api-redis-client: "true"
         api-postgres-client: "true"
+        db-daemon-client: "true"
     spec:
       containers:
-        - image: gcr.io/feeld-daveio/api-daemon:1.0.1
+        - image: gcr.io/feeld-daveio/api-daemon:1.0.3
           name: api-daemon
           resources:
             requests:
@@ -121,4 +122,4 @@ spec:
             - name: SERVER_OPTS
               value: -u puma -b 0.0.0.0 -p 3000
             - name: DELIVERY_ENDPOINT
-              value: https://db-daemon.eu.ngrok.io/yzkmq4yz
+              value: http://svc-db-daemon:3001/messages
