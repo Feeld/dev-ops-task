@@ -67,8 +67,8 @@ In this case I used a single file to store all Terraform objects. This environme
 1. Ensure you have the `gcloud` command-line tool installed and logged in.
 2. Create a project in GCP.
 3. Edit `terraform/main.auto.tfvars` and configure things to your preference.
-4. `bin/manage deps`
-5. `bin/manage terraform`
+4. `bin/deploy deps`
+5. `bin/deploy terraform`
 
 ### Build and deploy the application to GKE
 
@@ -76,9 +76,7 @@ In this case I used a single file to store all Terraform objects. This environme
 2. Fetch the GKE credentials for the Terraform-created cluster using `gcloud beta container clusters get-credentials primary --region europe-west2` (change the region if necessary).
 3. Ensure that `kubectl config current-context` shows the cluster you want to deploy to. If not, something like `kubectl config use-context gke_feeld-daveio_europe-west2_primary` is what you're after. Again, edit the region portion if necessary.
 4. `gcloud auth configure-docker`
-5. `bin/manage deps`
-6. `bin/manage bap`
-7. `bin/manage kubernetes`
+5. `bin/deploy all`
 
 ### Build and deploy the application to a local cluster
 
@@ -88,9 +86,9 @@ These instructions assume you'll be using `minikube`, which is the easiest way t
 2. `minikube start`. This will create a `minikube` context in your `kubectl` config and spin up the VM.
 3. `kubectl config use-context minikube`
 4. `eval $(minikube docker-env)`
-5. `bin/manage deps`
-6. `bin/manage build`
-7. `bin/manage kubernetes`
+5. `bin/deploy deps`
+6. `bin/deploy build`
+7. `bin/deploy kubernetes`
 
   ---
 
