@@ -1,3 +1,1 @@
 web: bundle exec rails server ${SERVER_OPTS}
-delivery: QUEUE=* rake resque:work
-scheduler: QUEUE=* rake resque:scheduler

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'resque/server'
-
 Rails.application.routes.draw do
   get 'metrics', to: 'internal#metrics'
   get 'healthz', to: 'internal#healthz'

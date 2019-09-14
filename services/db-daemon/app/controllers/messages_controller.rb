@@ -50,6 +50,6 @@ class MessagesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def message_params
-    params.require(:message).permit(:payload, :failing, :delivered, :delivered_at)
+    params.require(:message).permit(:payload)
   end
 end
