@@ -1,17 +1,17 @@
 # VARIABLES
 
 variable "kubernetes_version" {}
+variable "project_name" {}
+variable "gcp_region" {}
+variable "gcp_zone" {}
+variable "gcp_dns_root" {}
+variable "master_access_list" {}
 
 # GLOBAL
 
 terraform {
-  backend "remote" {
-    hostname     = "app.terraform.io"
-    organization = "feeld-recruitment-daveio"
-    # terraform cloud token in .terraformrc
-    workspaces {
-      prefix = "feeld-"
-    }
+  backend "local" {
+    path = ".terraform/terraform.tfstate"
   }
 }
 
@@ -19,13 +19,49 @@ terraform {
 
 provider "google-beta" {
   version = "~> 2.14"
-  # credentials = "${file("_gcp-account.json")}"
-  project = "feeld-daveio"
-  region  = "europe-west2"
-  zone    = "europe-west2-b"
+  project = "${var.project_name}"
+  region  = "${var.gcp_region}"
+  zone    = "${var.gcp_zone}"
 }
 
 # RESOURCES
+
+resource "google_dns_managed_zone" "feeld-env" {
+  provider   = "google-beta"
+  dns_name   = "${var.gcp_dns_root}."
+  name       = "feeld-env"
+  visibility = "public"
+}
+
+resource "google_dns_record_set" "production" {
+  provider     = "google-beta"
+  name         = "api.${google_dns_managed_zone.feeld-env.dns_name}"
+  managed_zone = "${google_dns_managed_zone.feeld-env.name}"
+  type         = "A"
+  ttl          = 300
+
+  rrdatas = ["${google_compute_global_address.addr-production-api-daemon.address}"]
+}
+
+resource "google_dns_record_set" "staging" {
+  provider     = "google-beta"
+  name         = "api.staging.${google_dns_managed_zone.feeld-env.dns_name}"
+  managed_zone = "${google_dns_managed_zone.feeld-env.name}"
+  type         = "A"
+  ttl          = 300
+
+  rrdatas = ["${google_compute_global_address.addr-staging-api-daemon.address}"]
+}
+
+resource "google_dns_record_set" "egress" {
+  provider     = "google-beta"
+  name         = "egress.${google_dns_managed_zone.feeld-env.dns_name}"
+  managed_zone = "${google_dns_managed_zone.feeld-env.name}"
+  type         = "A"
+  ttl          = 300
+
+  rrdatas = ["${google_compute_address.addr-outbound-nat.address}"]
+}
 
 resource "google_compute_global_address" "addr-production-api-daemon" {
   provider = "google-beta"
@@ -41,7 +77,7 @@ resource "google_compute_address" "addr-outbound-nat" {
   provider     = "google-beta"
   name         = "addr-outbound-nat"
   address_type = "EXTERNAL"
-  region       = "europe-west2"
+  region       = "${var.gcp_region}"
 }
 
 resource "google_compute_network" "k8s-primary-vpc" {
@@ -55,7 +91,7 @@ resource "google_compute_subnetwork" "k8s-primary-subnet" {
   name                     = "k8s-primary-subnet"
   network                  = "${google_compute_network.k8s-primary-vpc.name}"
   ip_cidr_range            = "10.0.0.0/16"
-  region                   = "europe-west2"
+  region                   = "${var.gcp_region}"
   private_ip_google_access = true
   enable_flow_logs         = true
 }
@@ -74,7 +110,7 @@ resource "google_compute_router_nat" "k8s-primary-nat" {
   provider                           = "google-beta"
   name                               = "k8s-primary-nat"
   router                             = "${google_compute_router.k8s-primary-router.name}"
-  region                             = "europe-west2"
+  region                             = "${var.gcp_region}"
   nat_ip_allocate_option             = "MANUAL_ONLY"
   nat_ips                            = ["${google_compute_address.addr-outbound-nat.self_link}"]
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
@@ -87,7 +123,7 @@ resource "google_compute_router_nat" "k8s-primary-nat" {
 resource "google_container_cluster" "primary" {
   provider                 = "google-beta"
   name                     = "primary"
-  location                 = "europe-west2"
+  location                 = "${var.gcp_region}"
   network                  = "${google_compute_network.k8s-primary-vpc.name}"
   subnetwork               = "${google_compute_subnetwork.k8s-primary-subnet.name}"
   remove_default_node_pool = true
@@ -114,19 +150,15 @@ resource "google_container_cluster" "primary" {
     master_ipv4_cidr_block  = "172.16.1.0/28"
   }
   master_authorized_networks_config {
-    cidr_blocks {
-      display_name = "754t-aaisp-nat4"
-      cidr_block   = "90.155.88.111/32"
-    }
-    cidr_blocks {
-      display_name = "754t-aaisp-public"
-      cidr_block   = "81.187.62.64/27"
-    }
-    cidr_blocks {
-      display_name = "754t-aaisp-babylon"
-      cidr_block   = "81.187.148.148/32"
+    dynamic "cidr_blocks" {
+      for_each = var.master_access_list
+      content {
+        display_name = cidr_blocks.value.desc
+        cidr_block   = cidr_blocks.value.cidr
+      }
     }
   }
+
   master_auth {
     client_certificate_config {
       issue_client_certificate = true
@@ -137,7 +169,7 @@ resource "google_container_cluster" "primary" {
 resource "google_container_node_pool" "primary" {
   provider   = "google-beta"
   name       = "primary-pool-0"
-  location   = "europe-west2"
+  location   = "${var.gcp_region}"
   cluster    = "${google_container_cluster.primary.name}"
   node_count = 2 # per zone in region
   version    = "${google_container_cluster.primary.min_master_version}"
@@ -192,4 +224,8 @@ output "v4addr_production-api-daemon" {
 
 output "v4addr_staging-api-daemon" {
   value = "${google_compute_global_address.addr-staging-api-daemon.address}"
+}
+
+output "gcp_delegation_nameservers" {
+  value = "${google_dns_managed_zone.feeld-env.name_servers}"
 }

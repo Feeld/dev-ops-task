@@ -1,40 +1,103 @@
 # Feeld DevOps recruitment task
 
-## Instructions
+  ---
 
-Use **Terraform** to set up all **GCP** infrastructure necessary to deploy a simple
-application to **GKE**.
+## Simplified overview
 
-Then use whatever tools you prefer to deploy the application to the cluster.
+```mermaid
+graph TD
+    internet[fa:fa-cloud Internet]
+    lb[fa:fa-map-signs Ingress LB]
+    subgraph
+        apid[fa:fa-cog API daemon]
+        apir[fa:fa-compass API Redis]
+        apip[fa:fa-database API PostgreSQL]
+    end
+    subgraph
+        dbd[fa:fa-cog Database daemon]
+        dbp[fa:fa-database Database PostgreSQL]
+    end
+    internet -- 80/tcp --> lb
+    internet -- 443/tcp --> lb
+    lb -- 3000/tcp --> apid
+    apid -- 6379/tcp --> apir
+    apid -- 5432/tcp --> apip
+    apid -- 3001/tcp --> dbd
+    dbd -- 5432/tcp --> dbp
+```
 
-The application should consist of 2 http services and a persistent database
-(of your choice), all 3 deployed to a k8s cluster.
+  ---
 
-- **Service 1**: should have 1 end point exposed to the outside world.
-- **Service 2**: should have 1 end point accessible by service 1.
-- **Database**: should be accessible only from service 2.
+## Components
 
-Calling the end point on service 1 should result in a row/document
-created in the database.
+### Ingress LB
 
-Deploy 2 versions of the app (**production** and **staging**) in the same cluster
-making sure that they are fully isolated.
+*Ingress*. GCP-managed ingress resource. Listens for plaintext and encrypted HTTP, and forwards plaintext requests to the **API daemon**.
 
-Submit your work as a **PR** to this git repo with all the code necessary to create the
-infrastructure and build/deploy the application.
+### API daemon
 
-Provide the following commands:
-1. creating the GCP infrastructure
-2. build and deploy the application to local cluster (for dev purposes)
-3. build and deploy the application to GKE
+*Deployment*. Accepts requests via HTTP, then asynchronously delivers them via HTTP to the **database daemon**. Keeps logs of delivery events and retries failed deliveries automatically.
 
-Bonus points:
-1. configure a static ip for outgoing traffic from the cluster (a use case
-   for this would be to connect to an external service which only allows
-   connections from whitelisted ips)
-2. restrict outgoing traffic for one of the services to only be able to connect
-   to specific external ips.
-3. restrict the Service 1 to only allow outbound traffic to Service 2
-4. make the cluster master nodes inaccessible from outside the clusters VPC
-4. add secrets management
+### API Redis
 
+*StatefulSet*. Used by Resque on the **API daemon** to handle asynchronous job queuing.
+
+### API PostgreSQL
+
+*StatefulSet*. Provides a backing store for the **API daemon** ORM.
+
+### Database daemon
+
+*Deployment*. Accepts requests via HTTP from the **API daemon** and stores them in the **database PostgreSQL** database.
+
+### Database PostgreSQL
+
+*StatefulSet*. Provides a backing store for the **database daemon** ORM and functions as the authoritative storage for received messages.
+
+  ---
+
+## Deliverable tasks
+
+### Create the GCP infrastructure
+
+Terraform is set up to use the `local` backend as this is a toy environment. In any production situation a remote state backend would be very important. During development I used Hashicorp's free Terraform Cloud offering, which worked well.
+
+In this case I used a single file to store all Terraform objects. This environment is just small enough to keep it from getting unwieldy, but anything bigger would benefit from a split configuration.
+
+1. Ensure you have the `gcloud` command-line tool installed and logged in.
+2. Create a project in GCP.
+3. Edit `terraform/main.auto.tfvars` and configure things to your preference.
+4. `bin/manage deps`
+5. `bin/manage terraform`
+
+### Build and deploy the application to GKE
+
+1. Ensure you have `kubectl` installed.
+2. Fetch the GKE credentials for the Terraform-created cluster using `gcloud beta container clusters get-credentials primary --region europe-west2` (change the region if necessary).
+3. Ensure that `kubectl config current-context` shows the cluster you want to deploy to. If not, something like `kubectl config use-context gke_feeld-daveio_europe-west2_primary` is what you're after. Again, edit the region portion if necessary.
+4. `gcloud auth configure-docker`
+5. `bin/manage deps`
+6. `bin/manage bap`
+7. `bin/manage kubernetes`
+
+### Build and deploy the application to a local cluster
+
+These instructions assume you'll be using `minikube`, which is the easiest way to spin up a Kubernetes environment. It also has a built-in Docker daemon, so you won't have to worry about configuring access to GCR.
+
+1. Ensure you have `kubectl` installed.
+2. `minikube start`. This will create a `minikube` context in your `kubectl` config and spin up the VM.
+3. `kubectl config use-context minikube`
+4. `eval $(minikube docker-env)`
+5. `bin/manage deps`
+6. `bin/manage build`
+7. `bin/manage kubernetes`
+
+  ---
+
+## Bonus points
+
+- [x] *configure a static ip for outgoing traffic from the cluster (a use case for this would be to connect to an external service which only allows connections from whitelisted ips)*
+- [ ] *restrict outgoing traffic for one of the services to only be able to connect to specific external ips*
+- [x] *restrict the Service 1 to only allow outbound traffic to Service 2*
+- [x] *make the cluster master nodes inaccessible from outside the clusters VPC*
+- [ ] *add secrets management*
