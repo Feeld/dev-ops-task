@@ -33,7 +33,4 @@ gem 'jbuilder', '~> 2.7' # https://github.com/rails/jbuilder
 gem 'pg', '>= 0.18', '< 2.0' # Use postgresql as the database for Active Record
 gem 'puma', '~> 3.11' # Use Puma as the app server
 gem 'rails', '~> 6.0.0'
-gem 'redis', '~> 4.0' # Use Redis adapter to run Action Cable in production
-gem 'resque', '~> 2.0'
-gem 'resque-scheduler', '~> 4.4'
 gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]

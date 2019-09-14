@@ -26,14 +26,9 @@ module DbDaemon
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 6.0
 
-    endpoint = ENV['DELIVERY_ENDPOINT'] || 'http://127.0.0.1:3001/messages'
-    config.delivery_endpoint = URI.parse(endpoint)
-
     config.generators do |g|
       g.orm :active_record, primary_key_type: :uuid
     end
-
-    config.active_job.queue_adapter = :resque
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration can go into files in config/initializers

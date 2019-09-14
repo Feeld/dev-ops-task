@@ -6,8 +6,6 @@ Rails.application.routes.draw do
   get 'metrics', to: 'internal#metrics'
   get 'healthz', to: 'internal#healthz'
   root to: 'internal#root'
-  mount Resque::Server, at: '/q'
-  resources :log_entries
   resources :messages
 
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
