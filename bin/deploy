@@ -175,25 +175,31 @@ function __bap() {
 function __all() {
     [[ ! -f ./LICENSE ]] && __wrong_root
     echo
-    echo "Stage 1: Terraform"
+    echo "Stage 1: Dependency check"
+    echo
+    (
+        __deps
+    )
+    echo
+    echo "Stage 2: Terraform"
     echo
     (
         __terraform
     )
     echo
-    echo "Stage 2: Build"
+    echo "Stage 3: Build"
     echo
     (
         __build
     )
     echo
-    echo "Stage 3: Push"
+    echo "Stage 4: Push"
     echo
     (
         __push
     )
     echo
-    echo "Stage 4: Kubernetes"
+    echo "Stage 5: Kubernetes"
     echo
     (
         __kubernetes
