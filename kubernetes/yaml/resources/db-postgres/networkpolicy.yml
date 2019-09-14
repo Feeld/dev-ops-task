@@ -2,20 +2,19 @@
 kind: NetworkPolicy
 apiVersion: "networking.k8s.io/v1"
 metadata:
-  name: db-postgres
+  name: db-postgres-masters
   labels:
     app: db-postgres
+    role: master
 spec:
-  policyTypes:
-    - Ingress
   podSelector:
     matchLabels:
       app: db-postgres
-      role: master
   ingress:
     # Allow inbound connections
     - ports:
         - port: 5432
+          protocol: TCP
       from:
         - podSelector:
             matchLabels:

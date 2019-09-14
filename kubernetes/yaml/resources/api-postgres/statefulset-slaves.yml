@@ -75,7 +75,7 @@ spec:
             - name: POSTGRES_CLUSTER_APP_NAME
               value: api_daemon
             - name: POSTGRES_MASTER_HOST
-              value: api-postgres-master-0.api-postgres
+              value: api-postgres
             - name: POSTGRES_MASTER_PORT_NUMBER
               value: "5432"
             - name: POSTGRES_PASSWORD
