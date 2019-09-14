@@ -113,9 +113,9 @@ spec:
             - name: RAILS_ENV
               value: production
             - name: DB_URL
-              value: postgres://api_daemon:on1majeeg7EGhauWohbio9Aezeepaf0i@api-postgres.production.svc.cluster.local/api_daemon
+              value: postgres://api_daemon:on1majeeg7EGhauWohbio9Aezeepaf0i@api-postgres/api_daemon
             - name: REDIS_URL
-              value: redis://:CE6atNNLOU@api-redis-master.production.svc.cluster.local:6379/1
+              value: redis://:CE6atNNLOU@api-redis-master:6379/1
             - name: RAILS_MASTER_KEY
               value: d85475872d82788a888e558989f5a1e2
             - name: SERVER_OPTS
