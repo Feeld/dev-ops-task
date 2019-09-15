@@ -33,10 +33,6 @@ spec:
         - podSelector:
             matchLabels:
               app: db-daemon
-    # - ports: []
-    #   to:
-    #     - ipBlock:
-    #         cidr: 1.2.3.4/32
 ---
 apiVersion: v1
 kind: Service
@@ -104,7 +100,7 @@ spec:
         db-daemon-client: "true"
     spec:
       containers:
-        - image: gcr.io/feeld-daveio/api-daemon:1.0.3
+        - image: gcr.io/feeld-dave-00002/api-daemon:1
           name: api-daemon
           resources:
             requests:
@@ -114,11 +110,20 @@ spec:
             - name: RAILS_ENV
               value: production
             - name: DB_URL
-              value: postgres://api_daemon:on1majeeg7EGhauWohbio9Aezeepaf0i@api-postgres/api_daemon
+              valueFrom:
+                secretKeyRef:
+                  name: api-daemon-env
+                  key: db_url
             - name: REDIS_URL
-              value: redis://:CE6atNNLOU@api-redis-master:6379/1
+              valueFrom:
+                secretKeyRef:
+                  name: api-daemon-env
+                  key: redis_url
             - name: RAILS_MASTER_KEY
-              value: d85475872d82788a888e558989f5a1e2
+              valueFrom:
+                secretKeyRef:
+                  name: api-daemon-env
+                  key: rails_master_key
             - name: SERVER_OPTS
               value: -u puma -b 0.0.0.0 -p 3000
             - name: DELIVERY_ENDPOINT

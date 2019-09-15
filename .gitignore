@@ -5,3 +5,9 @@ terraform/.terraform/plugins
 terraform/.terraform/terraform.tfstate
 terraform/.terraform/terraform.tfstate.backup
 
+# Sensitive data in Terraform variables
+terraform/main.auto.tfvars
+
+# Plaintext Kubernetes secrets
+# disabled to allow testing
+# kubernetes/yaml/resources/secrets.yml

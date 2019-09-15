@@ -16,7 +16,7 @@ class InternalController < ApplicationController
   end
 
   def root
-    render json: { "status": "ok" }
+    render json: { 'status': 'ok' }
   end
 
   private

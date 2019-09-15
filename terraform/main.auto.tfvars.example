@@ -1,9 +1,17 @@
+# Your billing account ID
+billing_account_id = ""
+
+# Your Organisation ID
+organisation_id = ""
 
 # Minimum Kubernetes master version. Will be automatically upgraded by GCP as necessary.
 kubernetes_version = "1.14.3-gke.11"
 
-# GCP project name
-project_name = "feeld-daveio"
+# GCP project name (will render as a folder)
+project_name = ""
+
+# A suffix for the active project version. Alphanumerics only.
+project_version = "00001"
 
 # GCP region for region-specific resources
 gcp_region = "europe-west2"
@@ -11,13 +19,13 @@ gcp_region = "europe-west2"
 # Default zone (inside gcp_region)
 gcp_zone = "europe-west2-b"
 
-# DNS records will be created under this level
+# DNS records will be created under this top level
 # You will need to add delegation NS records pointing to the nameservers listed in the output gcp_delegation_nameservers
 # Don't include the trailing full stop
 gcp_dns_root = "feeld.dave.io"
 
 # CIDR ranges allowed to access the Kubernetes master
 master_access_list = [
-  { desc = "754t-natv4", cidr = "90.155.88.111/32" },
-  { desc = "754t-pubv4", cidr = "81.187.62.64/27" },
+  { desc = "range1", cidr = "1.2.3.4/32" },
+  { desc = "range2", cidr = "4.3.2.0/24" },
 ]

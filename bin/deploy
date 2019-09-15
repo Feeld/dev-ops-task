@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Version number to tag built images with
-DAEMON_VERSION=1.0.3
+DAEMON_VERSION=1
 
 _T="$(command -v terraform)"
 _G="$(command -v gcloud)"
@@ -135,6 +135,10 @@ function __kubernetes() {
 
 function __build() {
     [[ ! -f ./LICENSE ]] && __wrong_root
+    GCP_PROJECT=$(
+        cd terraform || exit 1
+        terraform output gcp_project
+    )
     echo
     echo "Building daemons"
     echo
@@ -142,18 +146,18 @@ function __build() {
         echo "Building api-daemon"
         echo
         cd services/api-daemon || exit 1
-        docker build . -t gcr.io/feeld-daveio/api-daemon:${DAEMON_VERSION}
+        docker build . -t gcr.io/${GCP_PROJECT}/api-daemon:${DAEMON_VERSION}
         echo
-        echo "Built gcr.io/feeld-daveio/api-daemon:${DAEMON_VERSION}"
+        echo "Built gcr.io/${GCP_PROJECT}/api-daemon:${DAEMON_VERSION}"
         echo
     )
     (
         echo "Building db-daemon"
         echo
         cd services/db-daemon || exit 1
-        docker build . -t gcr.io/feeld-daveio/db-daemon:${DAEMON_VERSION}
+        docker build . -t gcr.io/${GCP_PROJECT}/db-daemon:${DAEMON_VERSION}
         echo
-        echo "Built gcr.io/feeld-daveio/db-daemon:${DAEMON_VERSION}"
+        echo "Built gcr.io/${GCP_PROJECT}/db-daemon:${DAEMON_VERSION}"
         echo
     )
     echo "Finished"
@@ -162,6 +166,10 @@ function __build() {
 
 function __push() {
     [[ ! -f ./LICENSE ]] && __wrong_root
+    GCP_PROJECT=$(
+        cd terraform || exit 1
+        terraform output gcp_project
+    )
     echo
     echo "Pushing daemons"
     echo
@@ -169,18 +177,18 @@ function __push() {
         echo "Pushing api-daemon"
         echo
         cd services/api-daemon || exit 1
-        docker push gcr.io/feeld-daveio/api-daemon:${DAEMON_VERSION}
+        docker push gcr.io/${GCP_PROJECT}/api-daemon:${DAEMON_VERSION}
         echo
-        echo "Pushed gcr.io/feeld-daveio/api-daemon:${DAEMON_VERSION}"
+        echo "Pushed gcr.io/${GCP_PROJECT}/api-daemon:${DAEMON_VERSION}"
         echo
     )
     (
         echo "Pushing db-daemon"
         echo
         cd services/db-daemon || exit 1
-        docker push gcr.io/feeld-daveio/db-daemon:${DAEMON_VERSION}
+        docker push gcr.io/${GCP_PROJECT}/db-daemon:${DAEMON_VERSION}
         echo
-        echo "Pushed gcr.io/feeld-daveio/db-daemon:${DAEMON_VERSION}"
+        echo "Pushed gcr.io/${GCP_PROJECT}/db-daemon:${DAEMON_VERSION}"
         echo
     )
     echo "Finished"
