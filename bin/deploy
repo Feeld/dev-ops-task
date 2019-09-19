@@ -74,6 +74,8 @@ function __usage() {
     echo "Deploy Kubernetes-managed resources to production only"
     echo -n "  ${0} build         "
     echo "Build daemon Docker images"
+    echo -n "  ${0} build-local   "
+    echo "Build daemon Docker images for local use"
     echo -n "  ${0} push          "
     echo "Push daemon Docker images to GCR"
     echo
@@ -133,12 +135,19 @@ function __kubernetes() {
     )
 }
 
-function __build() {
+function __kubernetes_local() {
     [[ ! -f ./LICENSE ]] && __wrong_root
-    GCP_PROJECT=$(
-        cd terraform || exit 1
-        terraform output gcp_project
-    )
+    __kubernetes
+    for ns in production staging; do
+        for dpl in api-daemon db-daemon; do
+            ${_K} patch -n ${ns} deploy ${dpl} -p "{ \"spec\": { \"template\": { \"spec\": { \"containers\": [ { \"name\": \"${dpl}\", \"image\": \"${dpl}:1\" } ] } } } }"
+            ${_K} rollout -n ${ns} restart deploy ${dpl}
+        done
+    done
+}
+
+function __do_build() {
+    [[ ! -f ./LICENSE ]] && __wrong_root
     echo
     echo "Building daemons"
     echo
@@ -146,30 +155,50 @@ function __build() {
         echo "Building api-daemon"
         echo
         cd services/api-daemon || exit 1
-        docker build . -t gcr.io/${GCP_PROJECT}/api-daemon:${DAEMON_VERSION}
+        docker build . -t ${REPO_PATH}api-daemon:${DAEMON_VERSION}
         echo
-        echo "Built gcr.io/${GCP_PROJECT}/api-daemon:${DAEMON_VERSION}"
+        echo "Built ${REPO_PATH}api-daemon:${DAEMON_VERSION}"
         echo
     )
     (
         echo "Building db-daemon"
         echo
         cd services/db-daemon || exit 1
-        docker build . -t gcr.io/${GCP_PROJECT}/db-daemon:${DAEMON_VERSION}
+        docker build . -t ${REPO_PATH}db-daemon:${DAEMON_VERSION}
         echo
-        echo "Built gcr.io/${GCP_PROJECT}/db-daemon:${DAEMON_VERSION}"
+        echo "Built ${REPO_PATH}db-daemon:${DAEMON_VERSION}"
         echo
     )
     echo "Finished"
     echo
 }
 
-function __push() {
+function __set_repo_local() {
+    REPO_PATH=""
+}
+
+function __set_repo() {
     [[ ! -f ./LICENSE ]] && __wrong_root
     GCP_PROJECT=$(
         cd terraform || exit 1
         terraform output gcp_project
     )
+    REPO_PATH="gcr.io/${GCP_PROJECT}/"
+}
+
+function __build_local() {
+    __set_repo_local
+    __do_build
+}
+
+function __build() {
+    __set_repo
+    __do_build
+}
+
+function __push() {
+    [[ ! -f ./LICENSE ]] && __wrong_root
+    __set_repo
     echo
     echo "Pushing daemons"
     echo
@@ -177,18 +206,18 @@ function __push() {
         echo "Pushing api-daemon"
         echo
         cd services/api-daemon || exit 1
-        docker push gcr.io/${GCP_PROJECT}/api-daemon:${DAEMON_VERSION}
+        docker push${REPO_PATH}api-daemon:${DAEMON_VERSION}
         echo
-        echo "Pushed gcr.io/${GCP_PROJECT}/api-daemon:${DAEMON_VERSION}"
+        echo "Pushed ${REPO_PATH}api-daemon:${DAEMON_VERSION}"
         echo
     )
     (
         echo "Pushing db-daemon"
         echo
         cd services/db-daemon || exit 1
-        docker push gcr.io/${GCP_PROJECT}/db-daemon:${DAEMON_VERSION}
+        docker push ${REPO_PATH}db-daemon:${DAEMON_VERSION}
         echo
-        echo "Pushed gcr.io/${GCP_PROJECT}/db-daemon:${DAEMON_VERSION}"
+        echo "Pushed ${REPO_PATH}db-daemon:${DAEMON_VERSION}"
         echo
     )
     echo "Finished"
@@ -250,6 +279,9 @@ terraform)
 kubernetes)
     __kubernetes
     ;;
+kubernetes-local)
+    __kubernetes_local
+    ;;
 staging)
     __kstaging
     ;;
@@ -258,6 +290,9 @@ production)
     ;;
 build)
     __build
+    ;;
+build-local)
+    __build_local
     ;;
 push)
     __push

@@ -90,8 +90,8 @@ These instructions assume you'll be using `minikube`, which is the easiest way t
 3. `kubectl config use-context minikube`
 4. `eval $(minikube docker-env)`
 5. `bin/deploy deps`
-6. `bin/deploy build`
-7. `bin/deploy kubernetes`
+6. `bin/deploy build-local`
+7. `bin/deploy kubernetes-local`
 
   ---
 
